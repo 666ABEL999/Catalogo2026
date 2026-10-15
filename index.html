@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo Titán Fit Store 2026</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Estilos personalizados y tema oscuro */
+    body {
+      background-color: #0d0d0d;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    .text-titan-orange {
+      color: #f97316;
+    }
+    .bg-titan-orange {
+      background-color: #f97316;
+    }
+    .border-titan-orange {
+      border-color: #f97316;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-10">
+
+  <!-- Encabezado / Banner -->
+  <header class="bg-black/90 border-b border-zinc-800 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-black tracking-wider text-titan-orange">TITÁN</span>
+        <span class="text-xs font-semibold bg-zinc-800 px-2 py-0.5 rounded text-zinc-300">FIT STORE</span>
+      </div>
+      <span class="text-xs text-zinc-400 font-medium">CATÁLOGO 2026</span>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
+
+    <!-- Menú Desplegable (Acordeón de Categorías) -->
+    <div class="relative">
+      <button 
+        id="btn-accordion" 
+        onclick="toggleAccordion()"
+        class="w-full bg-zinc-900 border border-zinc-700 hover:border-titan-orange px-4 py-3 rounded-xl flex items-center justify-between transition-colors shadow-lg"
+      >
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">Categoría:</span>
+          <span id="selected-category-label" class="text-sm font-bold text-titan-orange">AMINOACIDOS</span>
+        </div>
+        <span id="accordion-arrow" class="text-zinc-400 text-xs transition-transform duration-200">▼</span>
+      </button>
+
+      <!-- Lista desplegable -->
+      <div 
+        id="accordion-menu" 
+        class="hidden absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-40 overflow-hidden max-h-60 overflow-y-auto"
+      >
+        <div id="category-list" class="divide-y divide-zinc-800">
+          <!-- Se llenará dinámicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div id="products-grid" class="grid grid-cols-1 gap-4 pt-2">
+      <!-- Tarjetas de producto cargadas dinámicamente -->
+    </div>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // CONFIGURACIÓN DE WHATSAPP Y DATOS
+    // ==========================================
+    const TELEFONO_WHATSAPP = "593987654321"; // Ingresa aquí tu número con código de país (ej. 593...)
+
+    // Categorías disponibles
+    const categorias = [
+      "AMINOACIDOS", 
+      "BARRA DE PROTEINA", 
+      "COLÁGENO", 
+      "CREATINA", 
+      "GANADORES DE MASA", 
+      "GLUTAMINA",
+      "HIDROLIZADA ISOLATADA",
+      "PRE-ENTRENO",
+      "PROTEÍNA + QUEMADOR",
+      "WHEY PROTEIN",
+      "ACCESORIOS"
+    ];
+
+    // Productos de muestra (se pueden conectar a Google Sheets)
+    const productosBase = [
+      {
+        id: 1,
+        categoria: "AMINOACIDOS",
+        marca: "DORIAN YATES",
+        nombre: "HIT BCAA 10:1:1",
+        detalle: "20 SERVICIOS",
+        precio: "31,35",
+        descuento: "-25%",
+        imagen: "https://titanfitstore.com.ec/wp-content/uploads/2025/02/ACC0182.jpg"
+      },
+      {
+        id: 2,
+        categoria: "AMINOACIDOS",
+        marca: "KEVIN LEVRONE",
+        nombre: "LEVRONE EAA FRUIT PUNCH",
+        detalle: "185gr",
+        precio: "20,21",
+        descuento: "-25%",
+        imagen: "https://titanfitstore.com.ec/wp-content/uploads/2025/02/ACC0093.jpg"
+      },
+      {
+        id: 3,
+        categoria: "BARRA DE PROTEINA",
+        marca: "INTEGRAL MEDICA",
+        nombre: "INT-PROTEIN CRISP BAR",
+        detalle: "13 GRAMOS",
+        precio: "2,63",
+        descuento: "-25%",
+        imagen: "https://titanfitstore.com.ec/wp-content/uploads/2025/02/ACC0246.jpg"
+      }
+    ];
+
+    let categoriaActual = "AMINOACIDOS";
+
+    // Inicializar
+    document.addEventListener("DOMContentLoaded", () => {
+      renderCategoryMenu();
+      filterProducts(categoriaActual);
+    });
+
+    // Abrir/cerrar acordeón
+    function toggleAccordion() {
+      const menu = document.getElementById("accordion-menu");
+      const arrow = document.getElementById("accordion-arrow");
+      const isHidden = menu.classList.contains("hidden");
+
+      if (isHidden) {
+        menu.classList.remove("hidden");
+        arrow.style.transform = "rotate(180deg)";
+      } else {
+        menu.classList.add("hidden");
+        arrow.style.transform = "rotate(0deg)";
+      }
+    }
+
+    // Renderizar lista de categorías en el acordeón
+    function renderCategoryMenu() {
+      const container = document.getElementById("category-list");
+      container.innerHTML = "";
+
+      categorias.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `w-full text-left px-4 py-3 text-sm font-semibold transition-colors flex items-center justify-between ${
+          cat === categoriaActual ? "text-titan-orange bg-zinc-800/50" : "text-zinc-300 hover:bg-zinc-800"
+        }`;
+        btn.innerHTML = `
+          <span>${cat}</span>
+          ${cat === categoriaActual ? '<span class="text-xs">✓</span>' : ''}
+        `;
+        btn.onclick = () => selectCategory(cat);
+        container.appendChild(btn);
+      });
+    }
+
+    // Seleccionar categoría y cerrar acordeón
+    function selectCategory(cat) {
+      categoriaActual = cat;
+      document.getElementById("selected-category-label").innerText = cat;
+      toggleAccordion();
+      renderCategoryMenu();
+      filterProducts(cat);
+    }
+
+    // Filtrar y renderizar productos
+    function filterProducts(cat) {
+      const container = document.getElementById("products-grid");
+      container.innerHTML = "";
+
+      const filtrados = productosBase.filter(p => p.categoria === cat);
+
+      if (filtrados.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-zinc-500 text-sm">
+            No hay productos registrados en esta categoría.
+          </div>
+        `;
+        return;
+      }
+
+      filtrados.forEach(prod => {
+        const mensajeWa = encodeURIComponent(`Hola me interesa este producto: "${prod.nombre}", me interesaria comprarlo.`);
+        const urlWa = `https://wa.me/${TELEFONO_WHATSAPP}?text=${mensajeWa}`;
+
+        const card = document.createElement("div");
+        card.className = "bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex gap-4 items-center shadow-lg relative overflow-hidden";
+
+        card.innerHTML = `
+          <!-- Imagen del producto -->
+          <div class="w-24 h-24 bg-zinc-950 rounded-xl flex-shrink-0 flex items-center justify-center p-2 border border-zinc-800/80">
+            <img src="${prod.imagen}" alt="${prod.nombre}" class="max-h-full max-w-full object-contain" />
+          </div>
+
+          <!-- Información del producto -->
+          <div class="flex-1 min-w-0 flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">${prod.marca}</span>
+              <h3 class="text-sm font-black text-white leading-tight uppercase truncate">${prod.nombre}</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">${prod.detalle}</p>
+            </div>
+
+            <!-- Precio y Descuento -->
+            <div class="mt-2 flex items-baseline gap-2">
+              <span class="text-lg font-black text-titan-orange">$ ${prod.precio}</span>
+              <span class="text-[10px] font-bold text-orange-400 bg-orange-950/60 px-1.5 py-0.5 rounded border border-orange-800/50">${prod.descuento}</span>
+            </div>
+            <span class="text-[9px] text-zinc-500 font-semibold uppercase">INCLUYE IVA</span>
+
+            <!-- Botón WhatsApp -->
+            <a 
+              href="${urlWa}" 
+              target="_blank" 
+              class="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors shadow-md"
+            >
+              <span>Consultar por WhatsApp</span>
+            </a>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
