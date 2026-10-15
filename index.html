@@ -5,9 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo Titán Fit Store 2026</title>
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com">
-    const TELEFONO_WHATSAPP = "593987654321"; // Tu número actual
+  <script>
+    // ==========================================
+    // CONFIGURACIÓN DE WHATSAPP Y GOOGLE SHEETS
+    // ==========================================
+    const TELEFONO_WHATSAPP = "593987654321"; // Ingresa aquí tu número con código de país
+    
+    // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT QUE TERMINA EN /exec
     const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzUbUNUQ_qAMEA1XW1iZLoVYr6JLjLPa3jFRzCFe8RiHPpc58SDMQxS8XZ-jvImXFuP/exec";
+
+    let categoriaActual = "AMINOACIDOS";
+    let productosBase = [];
+    let categorias = [];
+
+    // INICIALIZAR Y CARGAR DESDE GOOGLE SHEETS
+    document.addEventListener("DOMContentLoaded", async () => {
+      await cargarDatosDesdeGoogleSheets();
+    });
+
+    // Función para conectar y extraer los datos de Google Sheets
+    async function cargarDatosDesdeGoogleSheets() {
+      if (!GOOGLE_SHEET_API_URL || GOOGLE_SHEET_API_URL.includes("TU_URL")) {
+        console.warn("Falta configurar la URL real de Google Sheets en GOOGLE_SHEET_API_URL");
+        return;
+      }
+
+      try {
+        const response = await fetch(GOOGLE_SHEET_API_URL);
+        const data = await response.json();
+        
+        productosBase = data;
+        
+        // Extrae automáticamente las categorías que tengas en tu Sheet
+        const catsUnicas = [...new Set(data.map(p => String(p.categoria).trim().toUpperCase()))];
+        if (catsUnicas.length > 0) {
+          categorias = catsUnicas;
+          categoriaActual = categorias[0];
+        }
+
+        renderCategoryMenu();
+        filterProducts(categoriaActual);
+      } catch (error) {
+        console.error("Error al sincronizar con Google Sheets:", error);
+      }
+    }
   </script>
   <style>
     /* Estilos personalizados y tema oscuro */
